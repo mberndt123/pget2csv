@@ -16,7 +16,6 @@ import java.nio.charset.StandardCharsets
           }.mkString + "\n"
         }.mkString
       Files.writeString(Paths.get(out), text, StandardCharsets.UTF_8)
-      ()
     case Attempt.Failure(err) =>
       println(err)
       sys.exit(1)
