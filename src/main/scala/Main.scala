@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets
   Pget.decoder.decode(bitVector) match
     case Attempt.Successful(DecodeResult(value, _)) =>
       val text = value.projections.map { p =>
-          p.counts.zip(p.deadtimes).map { case ((c1, c2, c3, c4), (d1, d2, d3, d4)) =>
+          p.pixelData.map { case PixelData((c1, c2, c3, c4), (d1, d2, d3, d4)) =>
             s"$c1,$c2,$c3,$c4,$d1,$d2,$d3,$d4\n"
           }.mkString + "\n"
         }.mkString

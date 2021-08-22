@@ -7,9 +7,14 @@ final case class Pget(
   // TODO: add header here
   projections: Vector[Data]
 )
+
+case class PixelData(
+  counts: (Int, Int, Int, Int),
+  deadtimes: (Short, Short, Short, Short)
+)
+
 final case class Data(
-  counts: Vector[(Int, Int, Int, Int)],
-  deadtimes: Vector[(Short, Short, Short, Short)],
+  pixelData: Vector[PixelData],
   countsNeutronTube1: Int,
   countsNeutronTube2: Int,
   deadtimeNeutronTube1: Short,
@@ -19,8 +24,8 @@ final case class Data(
 
 object Pget:
   private def projectionDecoder(numPixels: Int): Codec[Data] =
-    (vectorOfN(provide(numPixels), uint24L :: uint24L :: uint24L :: uint24L) ::
-      vectorOfN(provide(numPixels), ushort8 :: ushort8 :: ushort8 :: ushort8) ::
+    ((vectorOfN(provide(numPixels), uint24L :: uint24L :: uint24L :: uint24L) ::
+      vectorOfN(provide(numPixels), ushort8 :: ushort8 :: ushort8 :: ushort8)).xmap({ case (counts, deadtimes) => counts.zip(deadtimes).map(PixelData(_, _))}, _.unzip((p: PixelData) => (p.counts, p.deadtimes))) ::
       uint24L ::
       uint24L ::
       ushort8 ::
