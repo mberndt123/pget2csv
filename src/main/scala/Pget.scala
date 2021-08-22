@@ -27,7 +27,7 @@ object Pget:
     ((vectorOfN(provide(numPixels), uint24L :: uint24L :: uint24L :: uint24L) ::
       vectorOfN(provide(numPixels), ushort8 :: ushort8 :: ushort8 :: ushort8))
       .xmap(
-        { case (counts, deadtimes) =>
+        { (counts, deadtimes) =>
           counts.zip(deadtimes).map(PixelData(_, _))
         },
         _.unzip(p => (p.counts, p.deadtimes))
