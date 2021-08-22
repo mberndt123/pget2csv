@@ -30,7 +30,7 @@ object Pget:
         { case (counts, deadtimes) =>
           counts.zip(deadtimes).map(PixelData(_, _))
         },
-        _.unzip((p: PixelData) => (p.counts, p.deadtimes))
+        _.unzip(p => (p.counts, p.deadtimes))
       ) ::
       uint24L ::
       uint24L ::
