@@ -31,12 +31,12 @@ object Pget:
   val decoder: Decoder[Pget] =
     (for
       _ <- constant(hex"50474554") // "PGET"
-      _ <- uint32L.unit(0) // file size
+      _ <- uint32L.unit(0) // file size (shouldn't be 0, but this doesn't work for writing anyway, so whatever
       headerSize <- peek(uint16L)
-      _ <- ignore(8 * headerSize) // TODO: check for underflow
+      _ <- ignore(8 * headerSize)
       numProjections <- uint16L
       sizePerProjection <- uint16L
-      numPixels = (sizePerProjection - 12) / 16
+      numPixels = (sizePerProjection - 12) / 16 // TODO: check for arithmetic underflow
       data <- vectorOfN(provide(numProjections), projectionDecoder(numPixels))
     yield Pget(data)).complete
 end Pget
