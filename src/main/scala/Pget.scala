@@ -5,7 +5,7 @@ import scala.collection.immutable.ArraySeq
 
 final case class Pget(
     // TODO: add header here
-    projections: Vector[Data]
+    projections: Vector[ProjectionData]
 )
 
 case class PixelData(
@@ -13,7 +13,7 @@ case class PixelData(
     deadtimes: (Short, Short, Short, Short)
 )
 
-final case class Data(
+final case class ProjectionData(
     pixelData: Vector[PixelData],
     countsNeutronTube1: Int,
     countsNeutronTube2: Int,
@@ -23,7 +23,7 @@ final case class Data(
 )
 
 object Pget:
-  private def projectionDecoder(numPixels: Int): Codec[Data] =
+  private def projectionDecoder(numPixels: Int): Codec[ProjectionData] =
     ((vectorOfN(provide(numPixels), uint24L :: uint24L :: uint24L :: uint24L) ::
       vectorOfN(provide(numPixels), ushort8 :: ushort8 :: ushort8 :: ushort8))
       .xmap(
@@ -36,8 +36,12 @@ object Pget:
       uint24L ::
       ushort8 ::
       ushort8 ::
-      floatL).xmap(Data.apply, _ => ???)
+      floatL).xmap(ProjectionData.apply, _ => ???)
 
+  private val BytesPerPixel =
+    16 // 4 24-bit numbers for counts and 4 8-bit numbers for deadtimes
+  private val ExtraBytesPerProjection =
+    12 // number of bytes per projection on top of the pixel data
   val decoder: Decoder[Pget] =
     (for
       _ <- constant(hex"50474554") // "PGET"
@@ -49,7 +53,7 @@ object Pget:
       numProjections <- uint16L
       sizePerProjection <- uint16L
       numPixels =
-        (sizePerProjection - 12) / 16 // TODO: check for arithmetic underflow
+        (sizePerProjection - ExtraBytesPerProjection) / BytesPerPixel // TODO: check for arithmetic underflow
       data <- vectorOfN(provide(numProjections), projectionDecoder(numPixels))
     yield Pget(data)).complete
 end Pget
